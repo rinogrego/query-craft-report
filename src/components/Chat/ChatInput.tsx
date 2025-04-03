@@ -11,10 +11,16 @@ import {
   TooltipProvider,
   TooltipTrigger 
 } from "@/components/ui/tooltip";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 export function ChatInput() {
   const [message, setMessage] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const [isPromptsOpen, setIsPromptsOpen] = useState(false);
   const { toast } = useToast();
   const { currentConversationId, addMessage } = useAppStore();
 
@@ -50,30 +56,58 @@ export function ChatInput() {
       return "I can generate Excel reports based on your data. What kind of report would you like to create?";
     } else if (lowercaseMessage.includes("search") || lowercaseMessage.includes("find")) {
       return "I can search for information for you. What are you looking for specifically?";
+    } else if (lowercaseMessage.includes("polygenic") || lowercaseMessage.includes("risk") || lowercaseMessage.includes("score")) {
+      return "I can help you with polygenic risk score analysis. Would you like to upload genetic data or learn more about PRS interpretation?";
+    } else if (lowercaseMessage.includes("genetic") || lowercaseMessage.includes("dna") || lowercaseMessage.includes("genome")) {
+      return "I can assist with genetic data analysis. Do you have specific genetic markers you'd like to analyze or are you looking for a comprehensive report?";
     } else {
-      return "I understand you need assistance. Could you provide more details about what you're looking for?";
+      return "I understand you need assistance with polygenic risk scores. Could you provide more details about what you're looking for?";
     }
   };
 
   const handleUpload = () => {
     toast({
       title: "Feature coming soon",
-      description: "File upload functionality will be available soon!",
+      description: "Genomic data upload functionality will be available soon!",
     });
   };
 
   const handleSearchClick = () => {
     toast({
       title: "Feature coming soon",
-      description: "Advanced search functionality will be available soon!",
+      description: "Advanced genomic data search functionality will be available soon!",
     });
   };
 
   const handleIntentForm = () => {
     toast({
       title: "Feature coming soon",
-      description: "User intent form functionality will be available soon!",
+      description: "PRS analysis form functionality will be available soon!",
     });
+  };
+
+  const starterPrompts = [
+    {
+      title: "Analyze genetic data",
+      prompt: "I need to analyze a genomic dataset for polygenic risk scoring"
+    },
+    {
+      title: "Generate a risk report",
+      prompt: "Generate a polygenic risk score report for my dataset"
+    },
+    {
+      title: "Compare risk models",
+      prompt: "Help me compare different polygenic risk score models for cardiovascular disease"
+    },
+    {
+      title: "Explain PRS concepts",
+      prompt: "Explain how polygenic risk scores work and their limitations"
+    }
+  ];
+
+  const handleStarterPrompt = (prompt: string) => {
+    setMessage(prompt);
+    setIsPromptsOpen(false);
   };
 
   return (
@@ -84,7 +118,7 @@ export function ChatInput() {
       {isTyping && (
         <div className="flex items-center text-sm text-muted-foreground mb-2">
           <Bot className="h-4 w-4 mr-2 text-primary animate-pulse" />
-          <span>QueryCraft is typing</span>
+          <span>PRS Assistant is typing</span>
           <span className="flex ml-1">
             <span className="h-1.5 w-1.5 bg-primary rounded-full mr-0.5 animate-typing" style={{ animationDelay: "0ms" }}></span>
             <span className="h-1.5 w-1.5 bg-primary rounded-full mr-0.5 animate-typing" style={{ animationDelay: "200ms" }}></span>
@@ -120,7 +154,7 @@ export function ChatInput() {
                   <FileUp className="h-4 w-4" />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent>Upload file</TooltipContent>
+              <TooltipContent>Upload genomic data</TooltipContent>
             </Tooltip>
             
             <Tooltip>
@@ -137,19 +171,41 @@ export function ChatInput() {
               <TooltipContent>Advanced search</TooltipContent>
             </Tooltip>
             
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  onClick={handleIntentForm}
-                >
-                  <FileText className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Intent form</TooltipContent>
-            </Tooltip>
+            <Popover open={isPromptsOpen} onOpenChange={setIsPromptsOpen}>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <PopoverTrigger asChild>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                      >
+                        <FileText className="h-4 w-4" />
+                      </Button>
+                    </PopoverTrigger>
+                  </TooltipTrigger>
+                  <TooltipContent>Starter prompts</TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+              <PopoverContent className="w-[250px] p-0" align="end">
+                <div className="p-2 bg-muted/50">
+                  <h3 className="font-medium text-sm">Starter Prompts</h3>
+                </div>
+                <div className="p-2 max-h-[200px] overflow-y-auto">
+                  {starterPrompts.map((item, i) => (
+                    <Button
+                      key={i}
+                      variant="ghost"
+                      className="w-full justify-start text-left px-2 py-1.5 h-auto text-sm"
+                      onClick={() => handleStarterPrompt(item.prompt)}
+                    >
+                      {item.title}
+                    </Button>
+                  ))}
+                </div>
+              </PopoverContent>
+            </Popover>
             
             <Tooltip>
               <TooltipTrigger asChild>

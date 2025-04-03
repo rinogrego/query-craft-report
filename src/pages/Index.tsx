@@ -7,6 +7,11 @@ import { useAppStore } from "@/store/store";
 const Index = () => {
   const { currentConversationId, conversations, createConversation, setCurrentConversation } = useAppStore();
   
+  // Set page title
+  useEffect(() => {
+    document.title = "Polygenic Risk Score Automation";
+  }, []);
+  
   // Ensure there's a current conversation
   useEffect(() => {
     if (conversations.length === 0) {

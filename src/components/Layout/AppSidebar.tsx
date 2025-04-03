@@ -9,7 +9,6 @@ import {
   SidebarGroupContent,
   SidebarGroupLabel,
   SidebarMenu,
-  SidebarMenuButton,
   SidebarMenuItem,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
@@ -18,6 +17,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useAppStore } from "@/store/store";
 import { Separator } from "@/components/ui/separator";
 import { NewProjectDialog } from "@/components/Projects/NewProjectDialog";
+import { ConversationMenu } from "@/components/Chat/ConversationMenu";
+import { ProjectMenu } from "@/components/Projects/ProjectMenu";
 
 const AppSidebar = () => {
   const navigate = useNavigate();
@@ -29,7 +30,8 @@ const AppSidebar = () => {
     projects, 
     createConversation, 
     setCurrentConversation,
-    setSelectedProject
+    setSelectedProject,
+    currentConversationId
   } = useAppStore();
 
   const handleNewConversation = () => {
@@ -53,7 +55,7 @@ const AppSidebar = () => {
       <Sidebar>
         <SidebarContent className="flex flex-col h-full">
           <div className="flex items-center justify-between p-4">
-            <h1 className="text-xl font-bold text-sidebar-foreground">QueryCraft</h1>
+            <h1 className="text-xl font-bold text-sidebar-foreground">Polygenic Risk Score</h1>
             <SidebarTrigger />
           </div>
           
@@ -77,15 +79,10 @@ const AppSidebar = () => {
                 <SidebarMenu>
                   {conversations.map((conversation) => (
                     <SidebarMenuItem key={conversation.id}>
-                      <SidebarMenuButton
-                        onClick={() => handleSelectConversation(conversation.id)}
-                        className={location.pathname === "/" && conversation.id === useAppStore.getState().currentConversationId ? "bg-sidebar-accent" : ""}
-                      >
-                        <MessageSquare className="h-4 w-4 mr-2" />
-                        <span className="truncate">
-                          {conversation.name || `Conversation ${conversation.id.slice(0, 4)}`}
-                        </span>
-                      </SidebarMenuButton>
+                      <ConversationMenu 
+                        conversation={conversation}
+                        onSelect={() => handleSelectConversation(conversation.id)}
+                      />
                     </SidebarMenuItem>
                   ))}
                 </SidebarMenu>
@@ -112,13 +109,10 @@ const AppSidebar = () => {
                 <SidebarMenu>
                   {projects.map((project) => (
                     <SidebarMenuItem key={project.id}>
-                      <SidebarMenuButton
-                        onClick={() => handleSelectProject(project.id)}
-                        className={location.pathname.includes(`/projects/${project.id}`) ? "bg-sidebar-accent" : ""}
-                      >
-                        <FolderKanban className="h-4 w-4 mr-2" />
-                        <span className="truncate">{project.name}</span>
-                      </SidebarMenuButton>
+                      <ProjectMenu
+                        project={project}
+                        onSelect={() => handleSelectProject(project.id)}
+                      />
                     </SidebarMenuItem>
                   ))}
                 </SidebarMenu>
