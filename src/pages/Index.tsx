@@ -1,13 +1,31 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+
+import { useEffect } from "react";
+import { ChatWindow } from "@/components/Chat/ChatWindow";
+import AppLayout from "@/components/Layout/AppLayout";
+import { useAppStore } from "@/store/store";
 
 const Index = () => {
+  const { currentConversationId, conversations, createConversation, setCurrentConversation } = useAppStore();
+  
+  // Set page title
+  useEffect(() => {
+    document.title = "Polygenic Risk Score Automation";
+  }, []);
+  
+  // Ensure there's a current conversation
+  useEffect(() => {
+    if (conversations.length === 0) {
+      const newConversationId = createConversation();
+      setCurrentConversation(newConversationId);
+    } else if (!currentConversationId) {
+      setCurrentConversation(conversations[0].id);
+    }
+  }, [conversations, createConversation, currentConversationId, setCurrentConversation]);
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-gray-600">Start building your amazing project here!</p>
-      </div>
-    </div>
+    <AppLayout>
+      <ChatWindow />
+    </AppLayout>
   );
 };
 
