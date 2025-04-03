@@ -1,5 +1,5 @@
 
-import { useState, FormEvent } from "react";
+import { useState, FormEvent, useRef, useEffect } from "react";
 import { Send, FileUp, Search, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -11,12 +11,22 @@ import {
   TooltipProvider,
   TooltipTrigger 
 } from "@/components/ui/tooltip";
+import { llmService } from "@/components/LLM/LLMService";
 
 export function ChatInput() {
   const [message, setMessage] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const { toast } = useToast();
   const { currentConversationId, addMessage } = useAppStore();
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Auto-resize textarea
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "80px"; // Reset height
+      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 200)}px`;
+    }
+  }, [message]);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -27,31 +37,25 @@ export function ChatInput() {
     addMessage(currentConversationId, message, "user");
     setMessage("");
     
-    // Simulate bot typing
+    // Show typing indicator
     setIsTyping(true);
     
-    // Simulate bot response after a delay
-    setTimeout(() => {
-      const botResponse = generateMockResponse(message);
-      addMessage(currentConversationId, botResponse, "bot");
+    try {
+      // In a real implementation, this would call the LLM service via Supabase
+      // For now, we'll use our mock implementation
+      const response = await llmService.generateResponse(message);
+      
+      // Add bot response
+      addMessage(currentConversationId, response, "bot");
+    } catch (error) {
+      console.error("Error generating response:", error);
+      toast({
+        title: "Error",
+        description: "Failed to generate a response. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
       setIsTyping(false);
-    }, 1000);
-  };
-
-  // Mock response generator - this will be replaced with actual API calls
-  const generateMockResponse = (userMessage: string) => {
-    const lowercaseMessage = userMessage.toLowerCase();
-    
-    if (lowercaseMessage.includes("hello") || lowercaseMessage.includes("hi")) {
-      return "Hello! How can I help you today?";
-    } else if (lowercaseMessage.includes("pdf") || lowercaseMessage.includes("analyze")) {
-      return "I'd be happy to analyze a PDF for you. Please upload the file and I'll extract the relevant information.";
-    } else if (lowercaseMessage.includes("excel") || lowercaseMessage.includes("report")) {
-      return "I can generate Excel reports based on your data. What kind of report would you like to create?";
-    } else if (lowercaseMessage.includes("search") || lowercaseMessage.includes("find")) {
-      return "I can search for information for you. What are you looking for specifically?";
-    } else {
-      return "I understand you need assistance. Could you provide more details about what you're looking for?";
     }
   };
 
@@ -84,7 +88,7 @@ export function ChatInput() {
       {isTyping && (
         <div className="flex items-center text-sm text-muted-foreground mb-2">
           <Bot className="h-4 w-4 mr-2 text-primary animate-pulse" />
-          <span>QueryCraft is typing</span>
+          <span>PRS Assistant is thinking</span>
           <span className="flex ml-1">
             <span className="h-1.5 w-1.5 bg-primary rounded-full mr-0.5 animate-typing" style={{ animationDelay: "0ms" }}></span>
             <span className="h-1.5 w-1.5 bg-primary rounded-full mr-0.5 animate-typing" style={{ animationDelay: "200ms" }}></span>
@@ -95,9 +99,10 @@ export function ChatInput() {
 
       <div className="relative">
         <Textarea
+          ref={textareaRef}
           value={message}
           onChange={(e) => setMessage(e.target.value)}
-          placeholder="Type your message..."
+          placeholder="Ask about polygenic risk scores, genetic variants, or analysis methods..."
           className="min-h-[80px] resize-none pr-20 overflow-auto"
           onKeyDown={(e) => {
             if (e.key === "Enter" && !e.shiftKey) {
@@ -120,7 +125,7 @@ export function ChatInput() {
                   <FileUp className="h-4 w-4" />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent>Upload file</TooltipContent>
+              <TooltipContent>Upload genetic data</TooltipContent>
             </Tooltip>
             
             <Tooltip>
@@ -134,7 +139,7 @@ export function ChatInput() {
                   <Search className="h-4 w-4" />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent>Advanced search</TooltipContent>
+              <TooltipContent>Search PRS literature</TooltipContent>
             </Tooltip>
             
             <Tooltip>
@@ -148,7 +153,7 @@ export function ChatInput() {
                   <FileText className="h-4 w-4" />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent>Intent form</TooltipContent>
+              <TooltipContent>PRS analysis form</TooltipContent>
             </Tooltip>
             
             <Tooltip>
