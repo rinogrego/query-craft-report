@@ -216,10 +216,13 @@ export const ConversationMenu = ({ conversation, isButton = false, onSelect }: C
         <ContextMenuTrigger className="w-full h-full block">
           {/* children will be wrapped in this trigger */}
           {onSelect && (
-            <div className="w-full h-full" onClick={onSelect}>
+            <div className="w-full h-full group/menu-item" onClick={onSelect}>
               <SidebarMenuButton>
                 {conversation.name || `Conversation ${conversation.id.slice(0, 4)}`}
               </SidebarMenuButton>
+              <SidebarMenuAction showOnHover>
+                <MoreVertical className="h-4 w-4" />
+              </SidebarMenuAction>
             </div>
           )}
         </ContextMenuTrigger>

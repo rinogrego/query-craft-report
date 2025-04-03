@@ -1,5 +1,5 @@
 
-import { Plus, FolderKanban, MessageSquare } from "lucide-react";
+import { Plus, FolderKanban, MessageSquare, MoreVertical } from "lucide-react";
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
@@ -10,6 +10,7 @@ import {
   SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuItem,
+  SidebarMenuAction,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
@@ -50,6 +51,25 @@ const AppSidebar = () => {
     navigate(`/projects/${id}`);
   };
 
+  const handleDragStart = (e: React.DragEvent, conversationId: string) => {
+    e.dataTransfer.setData("conversationId", conversationId);
+    e.dataTransfer.effectAllowed = "move";
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+  };
+
+  const handleDrop = (e: React.DragEvent, projectId: string) => {
+    e.preventDefault();
+    const conversationId = e.dataTransfer.getData("conversationId");
+    if (conversationId) {
+      const { linkConversationToProject } = useAppStore.getState();
+      linkConversationToProject(conversationId, projectId);
+    }
+  };
+
   return (
     <>
       <Sidebar>
@@ -79,10 +99,17 @@ const AppSidebar = () => {
                 <SidebarMenu>
                   {conversations.map((conversation) => (
                     <SidebarMenuItem key={conversation.id}>
-                      <ConversationMenu 
-                        conversation={conversation}
-                        onSelect={() => handleSelectConversation(conversation.id)}
-                      />
+                      <div 
+                        draggable={true}
+                        onDragStart={(e) => handleDragStart(e, conversation.id)}
+                        className="w-full relative group"
+                      >
+                        <ConversationMenu 
+                          conversation={conversation}
+                          onSelect={() => handleSelectConversation(conversation.id)}
+                          isButton={false}
+                        />
+                      </div>
                     </SidebarMenuItem>
                   ))}
                 </SidebarMenu>
@@ -109,10 +136,17 @@ const AppSidebar = () => {
                 <SidebarMenu>
                   {projects.map((project) => (
                     <SidebarMenuItem key={project.id}>
-                      <ProjectMenu
-                        project={project}
-                        onSelect={() => handleSelectProject(project.id)}
-                      />
+                      <div 
+                        className="w-full group"
+                        onDragOver={handleDragOver}
+                        onDrop={(e) => handleDrop(e, project.id)}
+                      >
+                        <ProjectMenu
+                          project={project}
+                          onSelect={() => handleSelectProject(project.id)}
+                          isButton={false}
+                        />
+                      </div>
                     </SidebarMenuItem>
                   ))}
                 </SidebarMenu>

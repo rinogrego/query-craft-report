@@ -163,10 +163,13 @@ export const ProjectMenu = ({ project, isButton = false, onSelect }: ProjectMenu
         <ContextMenuTrigger className="w-full h-full block">
           {/* children will be wrapped in this trigger */}
           {onSelect && (
-            <div className="w-full h-full" onClick={onSelect}>
+            <div className="w-full h-full group/menu-item" onClick={onSelect}>
               <SidebarMenuButton>
                 {project.name || `Project ${project.id.slice(0, 4)}`}
               </SidebarMenuButton>
+              <SidebarMenuAction showOnHover>
+                <MoreVertical className="h-4 w-4" />
+              </SidebarMenuAction>
             </div>
           )}
         </ContextMenuTrigger>
